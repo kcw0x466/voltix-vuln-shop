@@ -1,0 +1,37 @@
+# Use one separate Compose project per student; use inside a disposable Linux VM.
+services:
+  shop:
+    build: .
+    ports: ["127.0.0.1:5000:5000"]
+    environment:
+      VOLTIX_LAB_MODE: "1"
+      VOLTIX_VULNS: "${VOLTIX_VULNS:-all}"
+      VOLTIX_SECRET: "${VOLTIX_SECRET:?Set VOLTIX_SECRET in .env}"
+      VOLTIX_WORKER_URL: "http://worker:7000"
+      VOLTIX_WORKER_TOKEN: "${VOLTIX_WORKER_TOKEN:?Set VOLTIX_WORKER_TOKEN in .env}"
+    volumes: ["shop-data:/app/instance"]
+    networks: [lab]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 80
+    mem_limit: 384m
+    cpus: 1
+  worker:
+    build:
+      context: .
+      dockerfile: lab/Dockerfile
+    environment:
+      VOLTIX_WORKER_TOKEN: "${VOLTIX_WORKER_TOKEN:?Set VOLTIX_WORKER_TOKEN in .env}"
+    networks: [lab]
+    read_only: true
+    tmpfs: ["/tmp:rw,noexec,nosuid,size=16m", "/scratch:rw,nosuid,size=16m,uid=10002,gid=10002,mode=700"]
+    cap_drop: [ALL]
+    security_opt: ["no-new-privileges:true"]
+    pids_limit: 24
+    mem_limit: 256m
+    cpus: 0.5
+networks:
+  lab:
+    internal: true
+volumes:
+  shop-data:

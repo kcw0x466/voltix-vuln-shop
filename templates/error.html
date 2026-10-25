@@ -1,0 +1,1 @@
+{% extends 'base.html' %}{% block content %}<main class="section"><div class="container empty-state"><h2>{{ error.code }}</h2><p>{{ error.description }}</p><div class="actions" style="justify-content:center"><a class="primary-btn" href="{{ url_for('products.home') }}">홈으로</a></div></div></main>{% endblock %}
